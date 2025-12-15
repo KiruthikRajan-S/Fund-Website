@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Payment - Tri Stone Industries</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: linear-gradient(to bottom right, #f5f7fa, #a6a6a7, #d3d5d8);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(204, 190, 197, 0.3), transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(80, 82, 87, 0.3), transparent 50%);
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .payment-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            align-items: start;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 24px;
+            padding: 35px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .header-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #b15e19, #f65c5c);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 10px 30px rgba(236, 72, 153, 0.3);
+        }
+
+        .header-icon i {
+            font-size: 32px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 26px;
+            color: #1e293b;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: #64748b;
+            font-size: 15px;
+        }
+
+        .order-summary {
+            position: sticky;
+            top: 20px;
+        }
+
+        .summary-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .summary-header i {
+            font-size: 24px;
+            color: #8b5cf6;
+        }
+
+        .summary-header h2 {
+            font-size: 20px;
+            color: #1e293b;
+            font-weight: 600;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .item-name {
+            color: #475569;
+            font-weight: 500;
+            font-size: 15px;
+        }
+
+        .item-price {
+            color: #8b5cf6;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .total-section {
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            padding: 20px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 20px rgba(139, 92, 246, 0.25);
+        }
+
+        .total-label {
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .total-amount {
+            color: white;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .payment-form h2 {
+            font-size: 20px;
+            color: #1e293b;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+        }
+
+        .payment-form h2 i {
+            color: #ec4899;
+            font-size: 22px;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: #334155;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group label .required {
+            color: #ef4444;
+            margin-left: 2px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+            color: #1e293b;
+            font-weight: 500;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+        }
+
+        .form-group input:hover {
+            border-color: #cbd5e1;
+            background: white;
+        }
+
+        .phone-wrapper {
+            display: grid;
+            grid-template-columns: 110px 1fr;
+            gap: 12px;
+        }
+
+        .country-code-input {
+            display: flex;
+            align-items: center;
+        }
+
+        .country-code-input input {
+            text-align: center;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #ec4899, #8b5cf6);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 10px 25px rgba(236, 72, 153, 0.3);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(236, 72, 153, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .submit-btn i {
+            font-size: 20px;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back-link a {
+            color: #8b5cf6;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+        }
+
+        .back-link a:hover {
+            color: #ec4899;
+            gap: 12px;
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 80px 40px;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .empty-cart i {
+            font-size: 80px;
+            color: #cbd5e1;
+            margin-bottom: 25px;
+        }
+
+        .empty-cart h2 {
+            color: #475569;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+
+        .empty-cart p {
+            color: #64748b;
+            margin-bottom: 30px;
+        }
+
+        .empty-cart a {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 35px;
+            background: linear-gradient(135deg, #ec4899, #8b5cf6);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(236, 72, 153, 0.3);
+        }
+
+        .empty-cart a:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(236, 72, 153, 0.4);
+        }
+
+        .secure-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .secure-badge i {
+            color: #10b981;
+        }
+
+        @media (max-width: 968px) {
+            .payment-wrapper {
+                grid-template-columns: 1fr;
+            }
+
+            .order-summary {
+                position: static;
+            }
+
+            .card {
+                padding: 25px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .phone-wrapper {
+                grid-template-columns: 100px 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 15px;
+            }
+
+            .container {
+                margin: 15px auto;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .phone-wrapper {
+                grid-template-columns: 90px 1fr;
+                gap: 8px;
+            }
+        }
+
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-icon">
+                <i class="fas fa-credit-card"></i>
+            </div>
+            <h1>Complete Your Payment</h1>
+            <p>Support Tri Stone Industries - Secure & Fast Checkout</p>
+        </div>
+
+        <div id="mainContent">
+            <!-- Content will be loaded here -->
+        </div>
+    </div>
+
+    <script>
+        let cartItems = [];
+        let cartTotal = 0;
+
+        function loadCartData() {
+            const storedItems = sessionStorage.getItem('cartItems');
+            const storedTotal = sessionStorage.getItem('cartTotal');
+
+            if (storedItems && storedTotal) {
+                cartItems = JSON.parse(storedItems);
+                cartTotal = parseFloat(storedTotal);
+                displayPaymentPage();
+            } else {
+                displayEmptyCart();
+            }
+        }
+
+        function displayEmptyCart() {
+            document.getElementById('mainContent').innerHTML = `
+                <div class="empty-cart">
+                    <i class="fas fa-shopping-cart"></i>
+                    <h2>Your cart is empty</h2>
+                    <p>Please add items to your cart before proceeding to payment</p>
+                    <a href="index.html">
+                        <i class="fas fa-arrow-left"></i> Back to Home
+                    </a>
+                </div>
+            `;
+        }
+
+        function displayPaymentPage() {
+            document.getElementById('mainContent').innerHTML = `
+                <div class="payment-wrapper">
+                    <div class="card payment-form">
+                        <h2>
+                            <i class="fas fa-user-circle"></i>
+                            Enter Your Details
+                        </h2>
+                        <form id="paymentForm">
+                            <div class="form-group">
+                                <label for="name">Full Name <span class="required">*</span></label>
+                                <input type="text" id="name" name="name" placeholder="Enter your full name" required autocomplete="name">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email">Email Address <span class="required">*</span></label>
+                                <input type="email" id="email" name="email" placeholder="your.email@example.com" required autocomplete="email">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Mobile Number <span class="required">*</span></label>
+                                <div class="phone-wrapper">
+                                    <div class="country-code-input">
+                                        <input type="text" id="countryCode" value="+91" maxlength="5" required autocomplete="tel-country-code">
+                                    </div>
+                                    <input type="tel" id="mobile" inputmode="numeric" maxlength="10" placeholder="10-digit number" required autocomplete="tel-national">
+                                </div>
+                            </div>
+
+                            <button type="submit" class="submit-btn">
+                                <i class="fas fa-lock"></i>
+                                Complete Payment
+                            </button>
+
+                            <div class="secure-badge">
+                                <i class="fas fa-shield-check"></i>
+                                Secured by Razorpay
+                            </div>
+                        </form>
+
+                        <div class="back-link">
+                            <a href="index.html">
+                                <i class="fas fa-arrow-left"></i> Back to Cart
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="card order-summary">
+                        <div class="summary-header">
+                            <i class="fas fa-receipt"></i>
+                            <h2>Order Summary</h2>
+                        </div>
+                        <div class="cart-items-list">
+                            ${cartItems.map(item => `
+                                <div class="cart-item">
+                                    <span class="item-name">${item.name}</span>
+                                    <span class="item-price">₹${item.price.toLocaleString()}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="total-section">
+                            <span class="total-label">Total Amount</span>
+                            <span class="total-amount">₹${cartTotal.toLocaleString()}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Add input validation for mobile number
+            const mobileInput = document.getElementById('mobile');
+            mobileInput.addEventListener('input', function(e) {
+                this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);
+            });
+
+            // Add form submit handler
+            document.getElementById('paymentForm').addEventListener('submit', handleFormSubmit);
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const countryCode = document.getElementById('countryCode').value.trim();
+            const mobile = document.getElementById('mobile').value.trim();
+
+            // Validate mobile number
+            if (mobile.length !== 10) {
+                alert('Please enter a valid 10-digit mobile number');
+                document.getElementById('mobile').focus();
+                return;
+            }
+
+            if (!/^\d{10}$/.test(mobile)) {
+                alert('Mobile number should contain only digits');
+                document.getElementById('mobile').focus();
+                return;
+            }
+
+            // Validate country code
+            if (!countryCode.startsWith('+')) {
+                alert('Country code must start with + (e.g., +91)');
+                document.getElementById('countryCode').focus();
+                return;
+            }
+
+            if (countryCode.length < 2 || countryCode.length > 5) {
+                alert('Please enter a valid country code');
+                document.getElementById('countryCode').focus();
+                return;
+            }
+
+            const fullPhone = countryCode + mobile;
+
+            // Initiate Razorpay payment
+            initiateRazorpay(name, email, fullPhone);
+        }
+
+        function initiateRazorpay(name, email, contact) {
+            const options = {
+                key: 'rzp_test_RMLp1U4xSLkunP', // Replace with your Razorpay Key ID
+                amount: cartTotal * 100, // Amount in paise
+                currency: 'INR',
+                name: 'Tri Stone Industries',
+                description: 'Support Tech Education',
+                image: 'image/Tristonelogo.png',
+                handler: function (response) {
+                    // Payment success
+                    alert('✅ Payment Successful!\n\nPayment ID: ' + response.razorpay_payment_id + '\n\nThank you for your support!');
+                    console.log('Payment Response:', response);
+                    
+                    // Clear cart data
+                    sessionStorage.removeItem('cartItems');
+                    sessionStorage.removeItem('cartTotal');
+                    
+                    // Redirect to home
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 2000);
+                },
+                prefill: {
+                    name: name,
+                    email: email,
+                    contact: contact
+                },
+                notes: {
+                    cart_items: cartItems.map(item => item.name).join(', '),
+                    organization: 'Tri Stone Industries'
+                },
+                theme: {
+                    color: '#8b5cf6'
+                },
+                modal: {
+                    ondismiss: function() {
+                        console.log('Payment cancelled by user');
+                    }
+                }
+            };
+
+            const razorpay = new Razorpay(options);
+            razorpay.open();
+        }
+
+        // Load cart data on page load
+        window.addEventListener('DOMContentLoaded', loadCartData);
+    </script>
+</body>
+</html>
